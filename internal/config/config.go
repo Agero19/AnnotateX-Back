@@ -1,0 +1,35 @@
+package config
+
+import (
+	"time"
+
+	"github.com/Agero19/AnnotateX-api/internal/env"
+)
+
+type dbConfig struct {
+	URL          string
+	MaxOpenConns int
+	MaxIdleConns int
+	MaxIdleTime  time.Duration
+}
+
+type Config struct {
+	Port string
+	DB   dbConfig
+	// Another configurations structs if needed
+	// cache, logging, s3, auth
+}
+
+func LoadConfig() (Config, error) {
+	cfg := Config{
+		Port: env.GetString("PORT", ":8080"),
+		DB: dbConfig{
+			URL:          env.GetString("DB_URL", "postgres://user:password@localhost:5432/dbname"),
+			MaxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 25),
+			MaxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 25),
+			MaxIdleTime:  env.GetDuration("DB_MAX_IDLE_TIME", 5*time.Minute),
+		},
+	}
+
+	return cfg, nil
+}
