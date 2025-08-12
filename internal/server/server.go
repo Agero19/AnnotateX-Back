@@ -1,22 +1,24 @@
 package server
 
 import (
-	"log"
 	"net/http"
 	"time"
 
 	"github.com/Agero19/AnnotateX-api/internal/config"
+	"github.com/Agero19/AnnotateX-api/internal/repository"
 	"github.com/go-chi/chi/middleware"
 	"github.com/go-chi/chi/v5"
 )
 
 type application struct {
 	Config config.Config
+	Repo   repository.Repository
 }
 
-func NewApp(cfg *config.Config) *application {
+func NewApp(cfg *config.Config, repo repository.Repository) *application {
 	return &application{
 		Config: *cfg,
+		Repo:   repo,
 	}
 }
 
@@ -39,8 +41,6 @@ func (app *application) Run(mux http.Handler) error {
 		ReadTimeout:  10 * time.Second,
 		IdleTimeout:  time.Minute,
 	}
-
-	log.Printf("Starting server on %s", app.Config.Port)
 
 	return srv.ListenAndServe()
 }
