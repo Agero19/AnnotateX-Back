@@ -7,6 +7,7 @@ import (
 )
 
 type dbConfig struct {
+	Name         string
 	URL          string
 	MaxOpenConns int
 	MaxIdleConns int
@@ -27,7 +28,28 @@ func LoadConfig() *Config {
 		Env:  env.GetString("ENV", "local"),
 		Port: env.GetString("PORT", ":8080"),
 		DB: dbConfig{
+			Name:         env.GetString("DB_NAME", "dbname"),
 			URL:          env.GetString("DB_URL", "postgres://user:password@localhost:5432/dbname"),
+			MaxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 25),
+			MaxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 25),
+			MaxIdleTime:  env.GetDuration("DB_MAX_IDLE_TIME", 5*time.Minute),
+		},
+	}
+	// panic if config is not set including fallbacks
+	if cfg.Env == "" || cfg.Port == "" || cfg.DB.URL == "" {
+		panic("Missing required config values")
+	}
+
+	return cfg
+}
+
+func LoadTestConfig() *Config {
+	cfg := &Config{
+		Env:  env.GetString("ENV", "local"),
+		Port: env.GetString("PORT", ":8080"),
+		DB: dbConfig{
+			Name:         env.GetString("TEST_DB_NAME", "test_dbname"),
+			URL:          env.GetString("TEST_DB_URL", "postgres://user:password@localhost:5432/dbname"),
 			MaxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 25),
 			MaxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 25),
 			MaxIdleTime:  env.GetDuration("DB_MAX_IDLE_TIME", 5*time.Minute),

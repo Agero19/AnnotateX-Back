@@ -45,6 +45,17 @@ func main() {
 	// Initialize repository
 	repo := repository.NewRepository(db)
 
+	// var user_sample repository.User
+	// user_sample.Username = "testuser"
+	// user_sample.Email = "testuser@example.com"
+	// user_sample.Password = "securepassword"
+
+	// // Create a sample user
+	// if err := repo.Users.Create(&user_sample); err != nil {
+	// 	log.Error("Failed to create user", "error", err)
+	// }
+	// log.Info("Created user", "id", user_sample.ID)
+
 	// Start the API server
 	app := server.NewApp(cfg, repo)
 	mux := app.Mount()
