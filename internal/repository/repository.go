@@ -8,29 +8,33 @@ import (
 
 // Repository is a struct that holds the database connection and repositories for different entities.
 type Repository struct {
-	Users interface {
-		Create(user *User) error
-		GetAll() ([]*User, error)
-		GetByID(id string) (*User, error)
-		Update(user *User) error
-		Delete(id string) error
-	}
+	Users       Users
+	Images      Images
+	Annotations Annotations
+}
 
-	Images interface {
-		Create(image *Image) error
-		GetAll() ([]*Image, error)
-		GetByID(id string) (*Image, error)
-		Update(image *Image) error
-		Delete(id string) error
-	}
+type Users interface {
+	Create(user *User) error
+	GetAll() ([]*User, error)
+	GetByID(id string) (*User, error)
+	Update(user *User) error
+	Delete(id string) error
+}
 
-	Annotations interface {
-		Create(annotation *Annotation) error
-		GetAll() ([]*Annotation, error)
-		GetByID(id string) (*Annotation, error)
-		Update(annotation *Annotation) error
-		Delete(id string) error
-	}
+type Images interface {
+	Create(image *Image) error
+	GetAll() ([]*Image, error)
+	GetByID(id string) (*Image, error)
+	Update(image *Image) error
+	Delete(id string) error
+}
+
+type Annotations interface {
+	Create(annotation *Annotation) error
+	GetAll() ([]*Annotation, error)
+	GetByID(id string) (*Annotation, error)
+	Update(annotation *Annotation) error
+	Delete(id string) error
 }
 
 // New creates a new Repository instance from a PostgreSQL connection pool.

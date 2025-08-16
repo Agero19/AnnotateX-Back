@@ -25,7 +25,7 @@ func (r *UserRepository) Create(user *User) error {
 
 	const op = "repository.UserRepository.Create"
 
-	err := r.db.QueryRow(
+	var err = r.db.QueryRow(
 		query,
 		user.Username,
 		user.Email,
