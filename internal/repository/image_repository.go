@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 )
 
 // Image represents an image in the database - Model
@@ -23,6 +24,9 @@ type ImageRepository struct {
 // Create inserts a new image into the database. It returns an error if the insertion fails.
 func (r *ImageRepository) Create(image *Image) error {
 	query := "INSERT INTO images (user_id, url, title, description, visibility) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_at"
+
+	const op = "repository.ImageRepository.Create"
+
 	err := r.db.QueryRow(
 		query,
 		image.UserID,
@@ -32,7 +36,7 @@ func (r *ImageRepository) Create(image *Image) error {
 		image.Visibility,
 	).Scan(&image.ID, &image.CreatedAt)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
 }
@@ -40,9 +44,12 @@ func (r *ImageRepository) Create(image *Image) error {
 // GetAll retrieves all images from the database.
 func (r *ImageRepository) GetAll() ([]*Image, error) {
 	query := "SELECT id, user_id, url, title, description, visibility, created_at FROM images"
+
+	const op = "repository.ImageRepository.GetAll"
+
 	rows, err := r.db.Query(query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer rows.Close()
 
@@ -57,7 +64,7 @@ func (r *ImageRepository) GetAll() ([]*Image, error) {
 			&image.Description,
 			&image.Visibility,
 			&image.CreatedAt); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: %w", op, err)
 		}
 		images = append(images, &image)
 	}
@@ -67,6 +74,9 @@ func (r *ImageRepository) GetAll() ([]*Image, error) {
 // GetByID retrieves an image by its ID from the database. Does not return an error if the image is not found.
 func (r *ImageRepository) GetByID(id string) (*Image, error) {
 	query := "SELECT id, user_id, url, title, description, visibility, created_at FROM images WHERE id = $1"
+
+	const op = "repository.ImageRepository.GetByID"
+
 	row := r.db.QueryRow(query, id)
 
 	var image Image
@@ -81,7 +91,7 @@ func (r *ImageRepository) GetByID(id string) (*Image, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	return &image, nil
 }
@@ -89,6 +99,9 @@ func (r *ImageRepository) GetByID(id string) (*Image, error) {
 // Update modifies an existing image in the database. It returns an error if the update fails.
 func (r *ImageRepository) Update(image *Image) error {
 	query := "UPDATE images SET url = $1, title = $2, description = $3, visibility = $4 WHERE id = $5"
+
+	const op = "repository.ImageRepository.Update"
+
 	_, err := r.db.Exec(
 		query,
 		image.URL,
@@ -97,15 +110,21 @@ func (r *ImageRepository) Update(image *Image) error {
 		image.Visibility,
 		image.ID,
 	)
-	return err
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	return nil
 }
 
 // Delete removes an image from the database by its ID. It returns an error if the deletion fails.
 func (r *ImageRepository) Delete(id string) error {
 	query := "DELETE FROM images WHERE id = $1"
+
+	const op = "repository.ImageRepository.Delete"
+
 	_, err := r.db.Exec(query, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
 }

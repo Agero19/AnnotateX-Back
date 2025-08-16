@@ -1,6 +1,9 @@
 package repository
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 // Annotation represents an annotation in the database - Model
 type Annotation struct {
@@ -23,6 +26,9 @@ type AnnotationRepository struct {
 // Create inserts a new annotation into the database. It returns an error if the insertion fails.
 func (r *AnnotationRepository) Create(annotation *Annotation) error {
 	query := `INSERT INTO annotations (image_id, user_id, x, y, width, height, comment) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, created_at`
+
+	const op = "repository.AnnotationRepository.Create"
+
 	err := r.db.QueryRow(
 		query,
 		annotation.ImageID,
@@ -34,7 +40,7 @@ func (r *AnnotationRepository) Create(annotation *Annotation) error {
 		annotation.Comment,
 	).Scan(&annotation.ID, &annotation.CreatedAt)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
 }
@@ -42,9 +48,12 @@ func (r *AnnotationRepository) Create(annotation *Annotation) error {
 // GetAll retrieves all annotations from the database.
 func (r *AnnotationRepository) GetAll() ([]*Annotation, error) {
 	query := `SELECT id, image_id, user_id, x, y, width, height, comment, created_at FROM annotations`
+
+	const op = "repository.AnnotationRepository.GetAll"
+
 	rows, err := r.db.Query(query)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	defer rows.Close()
 
@@ -61,7 +70,7 @@ func (r *AnnotationRepository) GetAll() ([]*Annotation, error) {
 			&annotation.Height,
 			&annotation.Comment,
 			&annotation.CreatedAt); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s: %w", op, err)
 		}
 		annotations = append(annotations, &annotation)
 	}
@@ -71,6 +80,9 @@ func (r *AnnotationRepository) GetAll() ([]*Annotation, error) {
 // GetByID retrieves an annotation by its ID from the database. Does not return an error if the annotation is not found.
 func (r *AnnotationRepository) GetByID(id string) (*Annotation, error) {
 	query := `SELECT id, image_id, user_id, x, y, width, height, comment, created_at FROM annotations WHERE id = $1`
+
+	const op = "repository.AnnotationRepository.GetByID"
+
 	row := r.db.QueryRow(query, id)
 
 	var annotation Annotation
@@ -87,7 +99,7 @@ func (r *AnnotationRepository) GetByID(id string) (*Annotation, error) {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 	return &annotation, nil
 }
@@ -95,6 +107,9 @@ func (r *AnnotationRepository) GetByID(id string) (*Annotation, error) {
 // Update modifies an existing annotation in the database. It returns an error if the update fails.
 func (r *AnnotationRepository) Update(annotation *Annotation) error {
 	query := `UPDATE annotations SET  x = $1, y = $2, width = $3, height = $4, comment = $5 WHERE id = $6`
+
+	const op = "repository.AnnotationRepository.Update"
+
 	_, err := r.db.Exec(query,
 		annotation.X,
 		annotation.Y,
@@ -104,7 +119,7 @@ func (r *AnnotationRepository) Update(annotation *Annotation) error {
 		annotation.ID,
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
 }
@@ -112,9 +127,12 @@ func (r *AnnotationRepository) Update(annotation *Annotation) error {
 // Delete removes an annotation from the database by its ID. It returns an error if the deletion fails.
 func (r *AnnotationRepository) Delete(id string) error {
 	query := `DELETE FROM annotations WHERE id = $1`
+
+	const op = "repository.AnnotationRepository.Delete"
+
 	_, err := r.db.Exec(query, id)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", op, err)
 	}
 	return nil
 }

@@ -57,7 +57,7 @@ func main() {
 	// log.Info("Created user", "id", user_sample.ID)
 
 	// Start the API server
-	app := server.NewApp(cfg, repo)
+	app := server.NewApp(cfg, repo, log)
 	mux := app.Mount()
 	//TODO: Implement graceful shutdown for the server
 	if err := app.Run(mux); err != nil {
